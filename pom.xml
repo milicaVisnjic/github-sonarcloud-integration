@@ -6,15 +6,15 @@
     <name>ticket-heatmap-server</name>
     <version>1.0.0</version>
     <properties>
-        <jackson.version>2.9.8</jackson.version>
         <java.version>1.8</java.version>
         <junit.version>4.12</junit.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-<!--        <sonar.host.url>https://sonarcloud.io</sonar.host.url>-->
-<!--        <sonar.login>52f4e23cfd97df058959caa47d1fbf1045e0c410</sonar.login>-->
-<!--        <sonar.organization>mgrand-wawa-github</sonar.organization>-->
-<!--        <sonar.projectKey>mgrand-wawa_sample-ticket-app</sonar.projectKey>-->
+        <minidev.version>1.0.9</minidev.version>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.login>a250ab819822d0c3428e639e0285052096105dc3</sonar.login>
+        <sonar.organization>mgrand-wawa-github</sonar.organization>
+        <sonar.projectKey>mgrand-wawa_github-sonarcloud-integration</sonar.projectKey>
         <spring.version>5.1.5.RELEASE</spring.version>
     </properties>
     <build>
@@ -65,11 +65,17 @@
             <artifactId>reactor-netty</artifactId>
             <version>0.8.6.RELEASE</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>${minidev.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.3.0-alpha4</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/junit/junit -->
