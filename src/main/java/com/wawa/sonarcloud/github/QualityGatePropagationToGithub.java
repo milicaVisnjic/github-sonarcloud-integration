@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Optional;
 
 /**
@@ -38,44 +40,69 @@ public class QualityGatePropagationToGithub {
         @Arg(dest = "pullRequest")
         Integer pullRequest;
 
+        @Arg(dest = "sonarCloudHost")
+        String sonarCloudHost;
+
         @Override
         public String toString() {
             return "CLOptions{" +
                     "analysisId='" + analysisId + '\'' +
                     ", branch='" + branch + '\'' +
                     ", projectKey='" + projectKey + '\'' +
-                    ", pullRequest='" + pullRequest + '\'' +
+                    ", pullRequest=" + pullRequest +
+                    ", sonarCloudHost='" + sonarCloudHost + '\'' +
                     '}';
         }
     }
 
     /**
      * Main entry point
+     *
      * @param argv The command line arguments
      */
     public static void main(String[] argv) {
         try {
             processArgs(argv)
-                    .map( clOptions -> getQualityGateStatus(clOptions.analysisId, clOptions.branch, clOptions.projectKey, clOptions.pullRequest))
-                    .map( status -> {logger.info("Status is " + status); return "";});
+                    .map(QualityGatePropagationToGithub::getQualityGateStatus)
+                    .map(status -> {
+                        //noinspection OptionalGetWithoutIsPresent
+                        logger.info("Status is " + status.get());
+                        return "";
+                    });
         } catch (Exception e) {
             logger.error("Unhandled exception", e);
         }
     }
 
-    private static Optional<String> getQualityGateStatus(String analysisId, String branch, String projectKey, Integer pullRequest) {
+    private static Optional<String> getQualityGateStatus(CLOptions clOptions) {
         WebClient webClient = WebClient.create();
         Mono<String> response = webClient.get()
-                .uri("https://dev-eu2ne9zx.auth0.com/oauth/token").accept(MediaType.APPLICATION_JSON)
+                .uri(uriBuilder -> buildQualityGateUri(clOptions, uriBuilder))
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(String.class);
         return parseQualityGateStatusResponse(response.block());
     }
 
+    private static URI buildQualityGateUri(CLOptions clOptions, UriBuilder uriBuilder) {
+        uriBuilder.scheme("https").host(clOptions.sonarCloudHost).path("/api/qualitygates/project_status");
+        conditionalParameterAppend("analysisId",clOptions.analysisId, uriBuilder);
+        conditionalParameterAppend("branch",clOptions.branch, uriBuilder);
+        conditionalParameterAppend("projectKey",clOptions.projectKey, uriBuilder);
+        conditionalParameterAppend("pullRequest",clOptions.pullRequest, uriBuilder);
+        return uriBuilder.build();
+    }
+
+    private static void conditionalParameterAppend(String name, Object value, UriBuilder uriBuilder) {
+        if (value != null) {
+            uriBuilder.queryParam(name, value);
+        }
+    }
+
     private static Optional<String> parseQualityGateStatusResponse(String response) {
         try {
-            JSONObject json = (JSONObject)new JSONParser(JSONParser.MODE_PERMISSIVE).parse(response);
-            return Optional.of(json.get("status").toString());
+            JSONObject json = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(response);
+            return Optional.of(((JSONObject)json.get("projectStatus")).get("status").toString());
         } catch (NullPointerException | ParseException e) {
             logger.error("Error parsing quality gate status response: " + response, e);
             return Optional.empty();
@@ -108,6 +135,7 @@ public class QualityGatePropagationToGithub {
         parser.addArgument("--branch").help("Branch key");
         parser.addArgument("--projectKey").help("Project key");
         parser.addArgument("--pullRequest").type(Integer.class).help("Pull request id");
+        parser.addArgument("--sonarCloudHost").setDefault("sonarcloud.io").help("Sonar Cloud Host");
         parser.addArgument("--version").action(Arguments.version());
         parser.addArgument("--help").action(Arguments.help());
         return parser;
