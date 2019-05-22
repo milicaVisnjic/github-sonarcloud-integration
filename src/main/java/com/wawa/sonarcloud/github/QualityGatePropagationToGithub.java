@@ -43,6 +43,9 @@ public class QualityGatePropagationToGithub {
         @Arg(dest = "sonarCloudHost")
         String sonarCloudHost;
 
+        @Arg(dest = "sonarCloudScheme")
+        String sonarCloudScheme;
+
         @Override
         public String toString() {
             return "CLOptions{" +
@@ -85,7 +88,7 @@ public class QualityGatePropagationToGithub {
     }
 
     private static URI buildQualityGateUri(CLOptions clOptions, UriBuilder uriBuilder) {
-        uriBuilder.scheme("https").host(clOptions.sonarCloudHost).path("/api/qualitygates/project_status");
+        uriBuilder.scheme(clOptions.sonarCloudScheme).host(clOptions.sonarCloudHost).path("/api/qualitygates/project_status");
         conditionalParameterAppend("analysisId",clOptions.analysisId, uriBuilder);
         conditionalParameterAppend("branch",clOptions.branch, uriBuilder);
         conditionalParameterAppend("projectKey",clOptions.projectKey, uriBuilder);
@@ -136,6 +139,7 @@ public class QualityGatePropagationToGithub {
         parser.addArgument("--projectKey").help("Project key");
         parser.addArgument("--pullRequest").type(Integer.class).help("Pull request id");
         parser.addArgument("--sonarCloudHost").setDefault("sonarcloud.io").help("Sonar Cloud Host");
+        parser.addArgument("--sonarCloudScheme").setDefault("https").help("Sonar Cloud scheme (https, http, ...)");
         parser.addArgument("--version").action(Arguments.version());
         parser.addArgument("--help").action(Arguments.help());
         return parser;
