@@ -66,7 +66,7 @@ public class QualityGatePropagationToGithub {
         @Arg(dest = "sonarCloudUrl")
         String sonarCloudUrl;
 
-        @Arg(dest = "v")
+        @Arg(dest = "verbose")
         Boolean verbose;
 
         @Override
