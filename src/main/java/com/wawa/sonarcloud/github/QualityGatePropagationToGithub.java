@@ -17,6 +17,7 @@ import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,9 @@ import java.util.Optional;
 public class QualityGatePropagationToGithub {
     private static Logger logger = LoggerFactory.getLogger(QualityGatePropagationToGithub.class);
 
+    /**
+     * Class to contain command line option values.
+     */
     private static class CLOptions {
         @Arg(dest = "analysisId")
         String analysisId;
@@ -77,14 +81,24 @@ public class QualityGatePropagationToGithub {
         }
     }
 
-    private static Optional<String> getQualityGateStatus(CLOptions clOptions) {
+    private static Optional<QualityGateStatus> getQualityGateStatus(CLOptions clOptions) {
         WebClient webClient = WebClient.create();
         Mono<String> response = webClient.get()
                 .uri(uriBuilder -> buildQualityGateUri(clOptions, uriBuilder))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(String.class);
-        return parseQualityGateStatusResponse(response.block());
+        return parseQualityGateStatusResponse(response.block()).flatMap(QualityGatePropagationToGithub::stringToQualityGateStatus);
+    }
+
+    private static Optional<QualityGateStatus> stringToQualityGateStatus(String statusString) {
+        try {
+            return Optional.of(QualityGateStatus.valueOf(statusString));
+        } catch (IllegalArgumentException e) {
+            String msg = "Unable to handle unexpected quality gate status \"" + statusString + "\". Expected one of " +Arrays.toString(QualityGateStatus.values());
+            logger.error(msg);
+            return Optional.empty();
+        }
     }
 
     private static URI buildQualityGateUri(CLOptions clOptions, UriBuilder uriBuilder) {
