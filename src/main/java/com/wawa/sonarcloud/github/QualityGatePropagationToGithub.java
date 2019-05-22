@@ -73,7 +73,7 @@ public class QualityGatePropagationToGithub {
                     .map(QualityGatePropagationToGithub::getQualityGateStatus)
                     .map(status -> {
                         //noinspection OptionalGetWithoutIsPresent
-                        logger.info("Status is " + status.get());
+                        logger.info("Status is {}", status.get());
                         return "";
                     });
         } catch (Exception e) {
@@ -135,7 +135,9 @@ public class QualityGatePropagationToGithub {
                 logger.error("Either --analysisId or --projectKey must be specified");
                 return Optional.empty();
             }
-            logger.info(clOptions.toString());
+            if (logger.isInfoEnabled()) {
+                logger.info(clOptions.toString());
+            }
             return Optional.of(clOptions);
         } catch (HelpScreenException e) {
             return Optional.empty(); // This is a normal way to exit when all that we are doing is displaying help.
