@@ -12,6 +12,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <minidev.version>1.0.9</minidev.version>
+        <!--suppress UnresolvedMavenProperty -->
+        <sonar.branch.name>${env.CF_REPO_NAME}</sonar.branch.name>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.login>a250ab819822d0c3428e639e0285052096105dc3</sonar.login>
         <sonar.organization>mgrand-wawa-github</sonar.organization>
