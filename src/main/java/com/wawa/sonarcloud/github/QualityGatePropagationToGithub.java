@@ -69,6 +69,9 @@ public class QualityGatePropagationToGithub {
         @Arg(dest = "verbose")
         Boolean verbose;
 
+        @Arg(dest = "pending")
+        Boolean pending;
+
         @Override
         public String toString() {
             return "CLOptions{" +
