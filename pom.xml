@@ -16,7 +16,7 @@
         <sonar.login>a250ab819822d0c3428e639e0285052096105dc3</sonar.login>
         <sonar.organization>mgrand-wawa-github</sonar.organization>
         <sonar.projectKey>mgrand-wawa_github-sonarcloud-integration</sonar.projectKey>
-        <spring.version>5.1.5.RELEASE</spring.version>
+        <spring.version>5.2.3.RELEASE</spring.version>
     </properties>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
